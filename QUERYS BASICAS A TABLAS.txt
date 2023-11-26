@@ -1,0 +1,5 @@
+use preparcial
+
+select * from Materiales;
+select * from OrdenesRetiro;
+select * from DetallesOrden;

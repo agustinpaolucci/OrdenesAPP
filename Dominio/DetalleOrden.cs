@@ -12,7 +12,7 @@ namespace OrdenesAPP.Dominio
         public Material Material { get; set; }
         public int Cantidad { get; set; }
 
-        public DetalleOrden(int idDet, Material mat, int cant)
+        public DetalleOrden(Material mat, int cant)
         {
             Material = mat;
             Cantidad = cant;
