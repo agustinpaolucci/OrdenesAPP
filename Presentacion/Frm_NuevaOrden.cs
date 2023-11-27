@@ -15,13 +15,13 @@ namespace OrdenesAPP.Presentacion
 {
     public partial class Frm_NuevaOrden : Form
     {
-        private OrdenRetiro nuevo;
+        private Maestro nuevoMaestro;
         private DBHelper ayudante;
 
         public Frm_NuevaOrden()
         {
             InitializeComponent();
-            nuevo = new OrdenRetiro();
+            nuevoMaestro = new Maestro();
             ayudante = new DBHelper();
         }
 
@@ -117,9 +117,9 @@ namespace OrdenesAPP.Presentacion
 
             int cantidad = Convert.ToInt32(txtCantidad.Text);
 
-            DetalleOrden detalle = new DetalleOrden(m, cantidad);
+            Detalle detalle = new Detalle(m, cantidad); // con el producto y la cantidad puedo hacer un detalle
 
-            nuevo.AgregarDetalle(detalle);
+            nuevoMaestro.AgregarDetalle(detalle);
 
             dgvDetalles.Rows.Add(new object[] { cod, nom, stock, cantidad });
         }
@@ -131,7 +131,7 @@ namespace OrdenesAPP.Presentacion
             {
                 if (dgvDetalles.CurrentCell.ColumnIndex == 4)
                 {
-                    nuevo.QuitarDetalle(dgvDetalles.CurrentRow.Index);
+                    nuevoMaestro.QuitarDetalle(dgvDetalles.CurrentRow.Index);
                     dgvDetalles.Rows.Remove(dgvDetalles.CurrentRow);
                 }
             }
@@ -144,21 +144,21 @@ namespace OrdenesAPP.Presentacion
             if (string.IsNullOrWhiteSpace(txtResponsable.Text))
             {
                 MessageBox.Show("Debe ingresar un RESPONSABLE", "CONTROL",
-                MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
             if (string.IsNullOrWhiteSpace(txtCantidad.Text))
             {
                 MessageBox.Show("Debe ingresar un valor en CANTIDAD", "CONTROL",
-                MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
             //2) IMPORTANTE: GRILLA CON AL MENOS 1 DETALLE
             if (dgvDetalles.Rows.Count == 0)
             {
-                MessageBox.Show("Debe ingresar al menos UN DETALLE", "Control",
-                MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                MessageBox.Show("Debe ingresar al menos UN DETALLE", "CONTROL",
+                MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
@@ -169,11 +169,12 @@ namespace OrdenesAPP.Presentacion
         // 6 - GUARDAR MAESTRO.
         private void GuardarMaestro()
         {
-            nuevo.Fecha = Convert.ToDateTime(txtFecha.Text);
-            nuevo.Responsable = txtResponsable.Text;
+            nuevoMaestro.Fecha = Convert.ToDateTime(txtFecha.Text);
+            nuevoMaestro.Responsable = txtResponsable.Text;
 
-            if (ayudante.Confirmar(nuevo))
+            if (ayudante.Confirmar(nuevoMaestro))
             {
+
                 MessageBox.Show("Nueva ORDEN Confirmada.",
                 "INFORME",
                 MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -208,6 +209,5 @@ namespace OrdenesAPP.Presentacion
         // MinimizeBox: False
         // FormerBorderStyle: FixedSingle
         /////////////////////////////////////////////////////////////////////
-
     }
 }

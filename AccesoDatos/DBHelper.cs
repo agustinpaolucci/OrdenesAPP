@@ -36,9 +36,9 @@ namespace OrdenesAPP.AccesoDatos
             return tabla;
         }
 
-        public bool Confirmar(OrdenRetiro objOrden)
+        public bool Confirmar(Maestro objOrden)
         {
-            bool resultado = true;
+            bool flag = true;
 
             SqlTransaction transaccion = null;
 
@@ -64,14 +64,14 @@ namespace OrdenesAPP.AccesoDatos
                 cmdMaestro.Parameters.Add(param);
                 cmdMaestro.ExecuteNonQuery();
 
-                int NroOrden = Convert.ToInt32(param.Value); // ALMACENO VALOR PARAM SALIDA
+                int numeroMaestro = Convert.ToInt32(param.Value); // ALMACENO VALOR PARAM SALIDA
 
 
                 // PONGO nroDetalle en 1!!!!
                 int numeroDetalle = 1;
 
                 //RECORRE CADA DETALLE
-                foreach (DetalleOrden det in objOrden.Detalles)
+                foreach (Detalle det in objOrden.Detalles)
                 {
                     SqlCommand cmdDetalle = new SqlCommand();
                     cmdDetalle.Connection = cnn;
@@ -79,25 +79,21 @@ namespace OrdenesAPP.AccesoDatos
                     cmdDetalle.CommandText = "SP_INSERTAR_DETALLE"; //USA PARAM SALIDA ANTERIOR
                     cmdDetalle.CommandType = CommandType.StoredProcedure;
                     cmdDetalle.Parameters.AddWithValue("@id_detalle", numeroDetalle);
-                    cmdDetalle.Parameters.AddWithValue("@id_orden", NroOrden);
+                    cmdDetalle.Parameters.AddWithValue("@id_orden", numeroMaestro);
                     cmdDetalle.Parameters.AddWithValue("@material", det.Material.Codigo);
                     cmdDetalle.Parameters.AddWithValue("@cantidad", det.Cantidad);
-
                     cmdDetalle.ExecuteNonQuery();
-
                     numeroDetalle++;
                 }
-                // TRY >>> COMMIT!
+                
                 transaccion.Commit();
-
-                MessageBox.Show("Se cargo la orden: " + NroOrden, "INFO", MessageBoxButtons.OK);
+                MessageBox.Show("Se cargo la ORDEN NRO: " + numeroMaestro, "INFO", MessageBoxButtons.OK);
             }
 
             catch (Exception)
             {
-                // SI SALIO ALGO MAL, CATCH CON UN ROLLBACK.
                 transaccion.Rollback();
-                resultado = false;
+                flag = false;
             }
 
             finally
@@ -107,8 +103,8 @@ namespace OrdenesAPP.AccesoDatos
                     Desconectar();
                 }
             }
-            // FINALLY SIEMPRE CIERRA LA CONEXION.
-            return resultado;
+
+            return flag;
         }
     }
 }

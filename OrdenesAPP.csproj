@@ -47,9 +47,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AccesoDatos\DBHelper.cs" />
-    <Compile Include="Dominio\DetalleOrden.cs" />
+    <Compile Include="Dominio\Detalle.cs" />
     <Compile Include="Dominio\Material.cs" />
-    <Compile Include="Dominio\OrdenRetiro.cs" />
+    <Compile Include="Dominio\Maestro.cs" />
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
     </Compile>

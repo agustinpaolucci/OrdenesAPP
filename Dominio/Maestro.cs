@@ -6,20 +6,20 @@ using System.Threading.Tasks;
 
 namespace OrdenesAPP.Dominio
 {
-    public class OrdenRetiro
+    public class Maestro
     {
         public int NroOrden { get; set; }
         public DateTime Fecha { get; set; }
         public string Responsable { get; set; }
-        public List<DetalleOrden> Detalles { get; set; }
+        public List<Detalle> Detalles { get; set; }
 
 
-        public OrdenRetiro() 
+        public Maestro() 
         {
-            Detalles = new List<DetalleOrden>();
+            Detalles = new List<Detalle>();
         }
 
-        public void AgregarDetalle(DetalleOrden detalle)
+        public void AgregarDetalle(Detalle detalle)
         {
             Detalles.Add(detalle);
         }

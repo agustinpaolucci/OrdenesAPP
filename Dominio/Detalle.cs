@@ -6,13 +6,12 @@ using System.Threading.Tasks;
 
 namespace OrdenesAPP.Dominio
 {
-    public class DetalleOrden
+    public class Detalle
     {
-
         public Material Material { get; set; }
         public int Cantidad { get; set; }
 
-        public DetalleOrden(Material mat, int cant)
+        public Detalle(Material mat, int cant)
         {
             Material = mat;
             Cantidad = cant;
