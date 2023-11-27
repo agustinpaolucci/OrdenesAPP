@@ -46,6 +46,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AccesoDatos\DBHelper.cs" />
     <Compile Include="Dominio\DetalleOrden.cs" />
     <Compile Include="Dominio\Material.cs" />
     <Compile Include="Dominio\OrdenRetiro.cs" />
@@ -88,8 +89,6 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="AccesoDatos\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

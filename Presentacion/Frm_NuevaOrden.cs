@@ -9,17 +9,20 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Data.SqlClient;
+using OrdenesAPP.AccesoDatos;
 
 namespace OrdenesAPP.Presentacion
 {
     public partial class Frm_NuevaOrden : Form
     {
         private OrdenRetiro nuevo;
+        private DBHelper ayudante;
 
         public Frm_NuevaOrden()
         {
             InitializeComponent();
             nuevo = new OrdenRetiro();
+            ayudante = new DBHelper();
         }
 
         private void Frm_NuevaOrden_Load(object sender, EventArgs e)
@@ -42,24 +45,16 @@ namespace OrdenesAPP.Presentacion
         
         private void CargarCombo()
         {
-            SqlConnection cnn = new SqlConnection(@"Data Source=.\SQLEXPRESS;Initial Catalog=PREPARCIAL;Integrated Security=True;");
-            cnn.Open();
+            ayudante.Conectar();
 
-            SqlCommand cmd = new SqlCommand();
-            cmd.Connection = cnn;
-            cmd.CommandText = "SP_CONSULTAR_MATERIALES";
-            cmd.CommandType = CommandType.StoredProcedure;
-
-            DataTable tabla = new DataTable();
-            tabla.Load(cmd.ExecuteReader());
-
+            DataTable tabla = ayudante.ObtenerListado();
             cboMateriales.DataSource = tabla;
             cboMateriales.ValueMember = "id_material";
             cboMateriales.DisplayMember = "nom_material";
             cboMateriales.DropDownStyle = ComboBoxStyle.DropDownList;
             cboMateriales.SelectedIndex = -1;
 
-            cnn.Close();
+            ayudante.Desconectar();      
         }
 
         // 2 BOTON AGREGAR
@@ -176,8 +171,8 @@ namespace OrdenesAPP.Presentacion
         {
             nuevo.Fecha = Convert.ToDateTime(txtFecha.Text);
             nuevo.Responsable = txtResponsable.Text;
-           
-            if (Confirmar())
+
+            if (ayudante.Confirmar(nuevo))
             {
                 MessageBox.Show("Nueva ORDEN Confirmada.",
                 "INFORME",
@@ -195,84 +190,6 @@ namespace OrdenesAPP.Presentacion
             }
         }
 
-        // 7 - CONFIRMAR
-        private bool Confirmar()
-        {
-            bool resultado = true;
-
-            SqlConnection cnn = new SqlConnection(@"Data Source=.\SQLEXPRESS;Initial Catalog=PREPARCIAL;Integrated Security=True;");
-            
-            SqlTransaction transaccion = null;
-
-            try
-            {
-                cnn.Open();
-
-                transaccion = cnn.BeginTransaction();
-
-                SqlCommand cmdMaestro = new SqlCommand();
-                cmdMaestro.Connection = cnn;
-                cmdMaestro.Transaction = transaccion;
-                cmdMaestro.CommandText = "SP_INSERTAR_ORDEN"; // 3 ENTRADA 1 SALIDA
-                cmdMaestro.CommandType = CommandType.StoredProcedure;
-
-                cmdMaestro.Parameters.AddWithValue("@fecha_orden", nuevo.Fecha);
-                cmdMaestro.Parameters.AddWithValue("@responsable", nuevo.Responsable);
-                
-
-                // CREO UN PARAMETRO PARA RECIBIR EL PARAMETRO DE SALIDA NRO PRESUPUESTO.
-                SqlParameter param = new SqlParameter("@prox_orden", SqlDbType.Int);
-                param.Direction = ParameterDirection.Output;
-                cmdMaestro.Parameters.Add(param);
-                cmdMaestro.ExecuteNonQuery();
-
-                int NroOrden = Convert.ToInt32(param.Value); // ALMACENO VALOR PARAM SALIDA
-
-
-                // PONGO nroDetalle en 1!!!!
-                int numeroDetalle = 1;
-
-                //RECORRE CADA DETALLE
-                foreach (DetalleOrden det in nuevo.Detalles)
-                {
-                    SqlCommand cmdDetalle = new SqlCommand();
-                    cmdDetalle.Connection = cnn;
-                    cmdDetalle.Transaction = transaccion;
-                    cmdDetalle.CommandText = "SP_INSERTAR_DETALLE"; //USA PARAM SALIDA ANTERIOR
-                    cmdDetalle.CommandType = CommandType.StoredProcedure;
-                    cmdDetalle.Parameters.AddWithValue("@id_detalle", numeroDetalle);
-                    cmdDetalle.Parameters.AddWithValue("@id_orden", NroOrden);
-                    cmdDetalle.Parameters.AddWithValue("@material", det.Material.Codigo);
-                    cmdDetalle.Parameters.AddWithValue("@cantidad", det.Cantidad);
-
-                    cmdDetalle.ExecuteNonQuery();
-
-                    numeroDetalle++;
-                }
-                // TRY >>> COMMIT!
-                transaccion.Commit();
-
-                MessageBox.Show("Se cargo la orden: "+ NroOrden,"INFO", MessageBoxButtons.OK);
-            }
-
-            catch (Exception)
-            {
-                // SI SALIO ALGO MAL, CATCH CON UN ROLLBACK.
-                transaccion.Rollback();
-                resultado = false;
-            }
-
-            finally
-            {
-                if (cnn != null && cnn.State == ConnectionState.Open)
-                {
-                    cnn.Close();
-                }
-            }
-            // FINALLY SIEMPRE CIERRA LA CONEXION.
-            return resultado;
-        }
-    
 
         private void brnCancelar_Click(object sender, EventArgs e)
         {
