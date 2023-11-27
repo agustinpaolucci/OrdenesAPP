@@ -34,6 +34,7 @@ namespace OrdenesAPP.Presentacion
         {
             txtFecha.Text = DateTime.Now.ToString("dd/MM/yy");
             txtResponsable.Text = string.Empty;
+            cboMateriales.SelectedIndex = -1;
             txtCantidad.Text = "0";
             this.ActiveControl = txtFecha;
         }
@@ -112,6 +113,13 @@ namespace OrdenesAPP.Presentacion
 
             Material m = new Material(cod,nom,stock);
 
+            // VERIFICACION DE STOCK
+            if (m.Stock < int.Parse(txtCantidad.Text))
+            {
+                MessageBox.Show("Debe ingresar una CANTIDAD MENOR. STOCK insuficiente", "CONTROL");
+                return;
+            }
+
             int cantidad = Convert.ToInt32(txtCantidad.Text);
 
             DetalleOrden detalle = new DetalleOrden(m, cantidad);
@@ -174,7 +182,10 @@ namespace OrdenesAPP.Presentacion
                 MessageBox.Show("Nueva ORDEN Confirmada.",
                 "INFORME",
                 MessageBoxButtons.OK, MessageBoxIcon.Information);
-                this.Dispose();
+                //this.Dispose();
+                LimpiarCampos();
+                dgvDetalles.Rows.Clear();
+                // PREPARA EL FORM PARA QUE QUEDE LIMPIO.
             }
             else
             {
@@ -240,6 +251,8 @@ namespace OrdenesAPP.Presentacion
                 }
                 // TRY >>> COMMIT!
                 transaccion.Commit();
+
+                MessageBox.Show("Se cargo la orden: "+ NroOrden,"INFO", MessageBoxButtons.OK);
             }
 
             catch (Exception)
